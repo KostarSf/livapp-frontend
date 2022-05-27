@@ -8,35 +8,47 @@ import Col from "react-bootstrap/Col";
 import Table from "react-bootstrap/Table";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
+import { Modal, Nav, Navbar } from "react-bootstrap";
 
-import "./styles.css";
+moment.locale("ru");
 
 function App() {
   return (
-    <Container>
-      <Row>
-        <Col>
-          <TodoListCard />
-        </Col>
-      </Row>
-    </Container>
+    <>
+      <Navbar bg="primary" variant="dark">
+        <Container>
+          <Navbar.Brand href="#">Обзор ливневок</Navbar.Brand>
+          <Nav className="me-auto">
+            <Nav.Link href="#">Статус</Nav.Link>
+          </Nav>
+        </Container>
+      </Navbar>
+      <Container className="mt-3">
+        <TodoListCard />
+      </Container>
+    </>
   );
 }
 
-const apiurl = "http://172.20.24.143:5000";
+const apiurl = "http://172.22.53.67:5000";
+const enableActions = false;
 
 function TodoListCard() {
   const [drains, setDrains] = React.useState(null);
+  const [statuses, setStatuses] = React.useState([]);
 
-  const fetchDrainsDisplay = () => {
+  const fetchData = () => {
     fetch(apiurl + "/drains/display")
       .then((r) => r.json())
       .then(setDrains);
+    fetch(apiurl + "/statuses")
+      .then((r) => r.json())
+      .then(setStatuses);
   };
 
   React.useEffect(() => {
-    fetchDrainsDisplay();
-    setInterval(fetchDrainsDisplay, 5000);
+    fetchData();
+    setInterval(fetchData, 4000);
   }, []);
 
   const onNewDrain = React.useCallback(
@@ -66,46 +78,41 @@ function TodoListCard() {
 
   return (
     <React.Fragment>
-      <AddDrainForm onNewDrain={onNewDrain} />
-      <Container fluid>
-        <Row>
-          <Col>
-            <Table bordered hover>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Название</th>
-                  <th>Адрес</th>
-                  <th>Статус</th>
-                  <th>Обновлено</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                {drains.map((drain) =>
-                  drain.id ? (
-                    <DrainDisplay
-                      drain={drain}
-                      key={`${drain.id}-${drain.name}`}
-                      onDrainUpdate={onDrainUpdate}
-                      onDrainRemoval={onDrainRemoval}
-                    />
-                  ) : (
-                    <tr key={`${drain.id}-${drain.name}`}>
-                      <td></td>
-                      <td>Загрузка информации...</td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                    </tr>
-                  )
-                )}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
-      </Container>
+      {enableActions && <AddDrainForm onNewDrain={onNewDrain} />}
+      <Table bordered hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Название</th>
+            <th>Адрес</th>
+            <th>Статус</th>
+            <th>Обновлено</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {drains.map((drain) =>
+            drain.id ? (
+              <DrainDisplay
+                drain={drain}
+                statuses={statuses.filter((s) => s.storm_drain_id === drain.id)}
+                key={`${drain.id}-${drain.name}`}
+                onDrainUpdate={onDrainUpdate}
+                onDrainRemoval={onDrainRemoval}
+              />
+            ) : (
+              <tr key={`${drain.id}-${drain.name}`}>
+                <td></td>
+                <td>Загрузка информации...</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            )
+          )}
+        </tbody>
+      </Table>
       {drains.length === 0 && (
         <p className="text-center">Ливневок в списке пока нет</p>
       )}
@@ -121,7 +128,6 @@ function AddDrainForm({ onNewDrain }) {
   const submitNewDrain = (e) => {
     e.preventDefault();
     setSubmitting(true);
-    console.log(JSON.stringify({ name: drainName, address: drainAddress }));
     fetch(apiurl + "/drains", {
       method: "POST",
       body: JSON.stringify({ name: drainName, address: drainAddress }),
@@ -129,8 +135,7 @@ function AddDrainForm({ onNewDrain }) {
     })
       .then((r) => r.json())
       .then((drain) => {
-        console.log(drain);
-        onNewDrain(drain);
+        //onNewDrain(drain);
         setSubmitting(false);
         setDrainName("");
         setDrainAddress("");
@@ -167,32 +172,68 @@ function AddDrainForm({ onNewDrain }) {
   );
 }
 
-function DrainDisplay({ drain, onDrainUpdate, onDrainRemoval }) {
-  const removeDrain = () => {
-    fetch(apiurl + `/drains/${drain.id}`, { method: "DELETE" }).then(() =>
-      onDrainRemoval(drain)
-    );
+function DrainDisplay({ drain, statuses, onDrainUpdate, onDrainRemoval }) {
+  const [historyShow, setShow] = React.useState(false);
+  const [deleted, setDeleted] = React.useState(false);
+
+  const showHistory = () => {
+    setShow(true);
   };
 
-  let rowColor = "transparent";
-  let status = "Чисто";
-  if (!drain.status_value) {
-    status = "Неизвестно";
-  }
-  if (drain.status_value === "full") {
-    rowColor = "#F57A6F";
-    status = "Забито полностью";
-  }
-  if (drain.status_value === "half") {
-    rowColor = "#F7ED81";
-    status = "Забито наполовину";
-  }
+  const clearHistory = () => {
+    fetch(apiurl + `/drains/${drain.id}/statuses`, { method: "DELETE" });
+  };
 
-  const displayData = drain.status_updated_at
-    ? moment(drain.status_updated_at, "YYYY-MM-DD hh:mm:ss")
-        .locale("ru")
-        .calendar()
-    : "Никогда";
+  const hideHistory = () => {
+    setShow(false);
+  };
+
+  const removeDrain = () => {
+    fetch(apiurl + `/drains/${drain.id}`, { method: "DELETE" }).then(() => {
+      setDeleted(true);
+    });
+  };
+
+  const getStatusInfo = (value) => {
+    if (!value) {
+      return ["#bbb", "Неизвестно"];
+    }
+    if (value === "0") {
+      return ["transparent", "В норме"];
+    }
+    if (value === "1") {
+      return ["#F57A6F", "Забито"];
+    }
+    if (value === "2") {
+      return ["#F7ED81", "Сильный поток"];
+    }
+    return ["#bbb", value];
+  };
+
+  const [rowColor, status] = getStatusInfo(drain.status_value);
+
+  const getDisplayTime = (time) => {
+    const localtime = moment(time, "YYYY-MM-DD hh:mm:ss").add(
+      moment().utcOffset(),
+      "m"
+    );
+    return time ? localtime.calendar() : "Никогда";
+  };
+
+  const displayData = getDisplayTime(drain.status_updated_at);
+
+  if (deleted) {
+    return (
+      <tr>
+        <td></td>
+        <td>Удалено...</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    );
+  }
 
   return (
     <tr>
@@ -202,15 +243,57 @@ function DrainDisplay({ drain, onDrainUpdate, onDrainRemoval }) {
       <td style={{ backgroundColor: rowColor }}>{status}</td>
       <td>{displayData}</td>
       <td>
-        <Button
-          size="sm"
-          variant="link"
-          onClick={removeDrain}
-          aria-label="Remove Item"
-        >
-          <i className="fa fa-trash text-danger" />
-          Удалить
+        <Button size="sm" variant="link" onClick={showHistory}>
+          История
         </Button>
+        {enableActions && (
+          <Button size="sm" variant="link" onClick={removeDrain}>
+            Удалить
+          </Button>
+        )}
+        {historyShow && (
+          <Modal show={historyShow} onHide={hideHistory} scrollable>
+            <Modal.Header closeButton>
+              <Modal.Title>{drain.name}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {enableActions && statuses && statuses.length > 0 && (
+                <Button size="sm" variant="link" onClick={clearHistory}>
+                  Очистить список
+                </Button>
+              )}
+
+              <Table bordered hover>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Статус</th>
+                    <th>Обновлено</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {statuses &&
+                    statuses.map((status) => {
+                      const [rowColor, statusName] = getStatusInfo(
+                        status.value
+                      );
+
+                      return (
+                        <tr key={`${status.id}-${status.updated_at}`}>
+                          <td>{status.id}</td>
+                          <td style={{ backgroundColor: rowColor }}>
+                            {statusName}
+                          </td>
+                          <td>{getDisplayTime(status.updated_at)}</td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </Table>
+              {statuses && statuses.length === 0 && <p>Пусто</p>}
+            </Modal.Body>
+          </Modal>
+        )}
       </td>
     </tr>
   );
