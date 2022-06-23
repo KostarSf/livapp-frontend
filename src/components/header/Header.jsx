@@ -20,6 +20,7 @@ import WaterIcon from "@mui/icons-material/Water";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloudIcon from "@mui/icons-material/Cloud";
 import SettingsIcon from "@mui/icons-material/Settings";
+import ThunderstormIcon from "@mui/icons-material/Thunderstorm";
 import {
   Alert,
   Badge,
@@ -41,7 +42,9 @@ const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
 const Header = (props) => {
   const systems = props.systems;
-  const notifySystems = systems.filter((s) => s.status.value === "1");
+  const notifySystems = systems.filter(
+    (s) => s.status && s.status.value !== "0"
+  );
 
   const [anchorElNav, setAnchorElNav] = React.useState(null);
 
@@ -60,158 +63,6 @@ const Header = (props) => {
   };
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
-  };
-
-  const MenuButtons = () => {
-    const [anchorElNotif, setAnchorElNotif] = React.useState(null);
-    const [anchorElWeather, setAnchorElWeather] = React.useState(null);
-    const [anchorElDev, setAnchorElDev] = React.useState(null);
-
-    const handleClickDev = (event) => {
-      setAnchorElDev(event.currentTarget);
-    };
-
-    const handleCloseDev = () => {
-      setAnchorElDev(null);
-    };
-
-    const handleClickNotif = (event) => {
-      setAnchorElNotif(event.currentTarget);
-    };
-
-    const handleCloseNotif = () => {
-      setAnchorElNotif(null);
-    };
-
-    const handleClickWeather = (event) => {
-      setAnchorElWeather(event.currentTarget);
-    };
-
-    const handleCloseWeather = () => {
-      setAnchorElWeather(null);
-    };
-
-    const WeatherDay = (props) => {
-      return (
-        <Box display="flex" flexDirection="column" alignItems="center">
-          <Box display="flex" alignItems="center">
-            {props.icon}
-            <Typography variant="button" marginLeft={0.5}>
-              {props.temp}°
-            </Typography>
-          </Box>
-          <Typography variant="body1">{props.day}</Typography>
-        </Box>
-      );
-    };
-
-    return (
-      <Stack spacing={2} direction="row" alignItems="center">
-        <IconButton sx={{ color: "white" }} onClick={handleClickNotif}>
-          <Badge badgeContent={notifySystems.length} color="warning">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <Popover
-          id="notify-popover"
-          open={Boolean(anchorElNotif)}
-          anchorEl={anchorElNotif}
-          onClose={handleCloseNotif}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-        >
-          <List
-            subheader={
-              <ListSubheader>Системы, требующие внимания</ListSubheader>
-            }
-          >
-            {notifySystems.map((sys) => (
-              <React.Fragment key={sys.id}>
-                <ListItemButton>
-                  <ListItemIcon>
-                    {sys.type === "drain" ? <WaterIcon /> : <DeleteIcon />}
-                  </ListItemIcon>
-                  <ListItemText primary={sys.name} secondary={sys.address} />
-                </ListItemButton>
-              </React.Fragment>
-            ))}
-          </List>
-        </Popover>
-        <Badge badgeContent="1" color="warning" variant="dot">
-          <Button
-            onClick={handleClickWeather}
-            variant="text"
-            startIcon={<CloudIcon />}
-            sx={{
-              color: "white",
-            }}
-          >
-            24°
-          </Button>
-        </Badge>
-        <Popover
-          id="weather-popover"
-          open={Boolean(anchorElWeather)}
-          anchorEl={anchorElWeather}
-          onClose={handleCloseWeather}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-          PaperProps={{
-            sx: {
-              maxWidth: { xs: "auto", sm: "350px" },
-            },
-          }}
-        >
-          <Typography
-            variant="h6"
-            component="p"
-            color={grey[700]}
-            fontWeight={300}
-            textAlign="center"
-            sx={{ px: 2, py: 2 }}
-          >
-            Пятница, 23 июня 2022
-          </Typography>
-          <Stack
-            spacing={2}
-            direction="row"
-            divider={<Divider orientation="vertical" flexItem />}
-            sx={{
-              py: 2,
-              px: 2,
-            }}
-            justifyContent="center"
-          >
-            <WeatherDay icon={<CloudIcon />} temp="19" day="ПТ" />
-            <WeatherDay icon={<CloudIcon />} temp="18" day="СБ" />
-            <WeatherDay icon={<WbSunnyIcon />} temp="24" day="ВС" />
-          </Stack>
-          <Link href="#" sx={{ px: 2 }} textAlign="center" display="block">
-            Подробный прогноз
-          </Link>
-          <Alert severity="warning" sx={{ mt: 1 }}>
-            Рекомендуется провести чистку систем перед осадками
-          </Alert>
-        </Popover>
-        {Store.IsDeveloper() && (
-          <IconButton sx={{ color: "white" }} onClick={handleClickDev}>
-            <SettingsIcon />
-          </IconButton>
-        )}
-      </Stack>
-    );
   };
 
   return (
@@ -235,7 +86,7 @@ const Header = (props) => {
                 flexGrow: 1,
               }}
             >
-              <MenuButtons />
+              <MenuButtons embeds={notifySystems} />
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>
@@ -263,7 +114,7 @@ const Header = (props) => {
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
               >
-                <MenuItem onClick={handleCloseUserMenu}>
+                <MenuItem disabled onClick={handleCloseUserMenu}>
                   <Typography textAlign="center">Аккаунт</Typography>
                 </MenuItem>
                 <MenuItem
@@ -281,6 +132,233 @@ const Header = (props) => {
       </AppBar>
       <Toolbar />
     </>
+  );
+};
+
+const MenuButtons = (props) => {
+  const [anchorElNotif, setAnchorElNotif] = React.useState(null);
+  const [anchorElWeather, setAnchorElWeather] = React.useState(null);
+  const [anchorElDev, setAnchorElDev] = React.useState(null);
+
+  const notifySystems = props.embeds;
+
+  const handleClickDev = (event) => {
+    setAnchorElDev(event.currentTarget);
+  };
+
+  const handleCloseDev = () => {
+    setAnchorElDev(null);
+  };
+
+  const handleClickNotif = (event) => {
+    setAnchorElNotif(event.currentTarget);
+  };
+
+  const handleCloseNotif = () => {
+    setAnchorElNotif(null);
+  };
+
+  const handleClickWeather = (event) => {
+    setAnchorElWeather(event.currentTarget);
+  };
+
+  const handleCloseWeather = () => {
+    setAnchorElWeather(null);
+  };
+
+  const WeatherDay = (props) => {
+    return (
+      <Box display="flex" flexDirection="column" alignItems="center">
+        <Box display="flex" alignItems="center" color={props.color || "black"}>
+          {props.icon}
+          <Typography variant="button" marginLeft={0.5} color="black">
+            {props.temp}°
+          </Typography>
+        </Box>
+        <Typography variant="body1">{props.day}</Typography>
+      </Box>
+    );
+  };
+
+  const SetEmbedStatus = async (id, value) => {
+    await fetch(
+      "https://emapi.kostarsf.space/api/embeded/status?api_key=fab7b608",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ systemId: id, value: value }),
+      }
+    );
+  };
+
+  const notifies = notifySystems.filter(
+    (sys) => sys.status.value === (sys.type === "drain" ? "1" : "2")
+  );
+
+  return (
+    <Stack spacing={2} direction="row" alignItems="center">
+      <IconButton sx={{ color: "white" }} onClick={handleClickNotif}>
+        <Badge badgeContent={notifies.length} color="warning">
+          <NotificationsIcon />
+        </Badge>
+      </IconButton>
+      <Popover
+        id="notify-popover"
+        open={Boolean(anchorElNotif)}
+        anchorEl={anchorElNotif}
+        onClose={handleCloseNotif}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+      >
+        <List
+          subheader={
+            <ListSubheader>
+              {notifies.length
+                ? "Системы, требующие внимания"
+                : "Новых уведомлений нет"}
+            </ListSubheader>
+          }
+        >
+          {notifies.map((sys) => (
+            <React.Fragment key={sys.id}>
+              <ListItemButton>
+                <ListItemIcon>
+                  {sys.type === "drain" ? <WaterIcon /> : <DeleteIcon />}
+                </ListItemIcon>
+                <ListItemText primary={sys.name} secondary={sys.address} />
+              </ListItemButton>
+            </React.Fragment>
+          ))}
+        </List>
+      </Popover>
+      <Badge badgeContent="1" color="warning" variant="dot">
+        <Button
+          onClick={handleClickWeather}
+          variant="text"
+          startIcon={<CloudIcon />}
+          sx={{
+            color: "white",
+          }}
+        >
+          19°
+        </Button>
+      </Badge>
+      <Popover
+        id="weather-popover"
+        open={Boolean(anchorElWeather)}
+        anchorEl={anchorElWeather}
+        onClose={handleCloseWeather}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
+        PaperProps={{
+          sx: {
+            maxWidth: { xs: "auto", sm: "350px" },
+          },
+        }}
+      >
+        <Typography
+          variant="h6"
+          component="p"
+          color={grey[700]}
+          fontWeight={300}
+          textAlign="center"
+          sx={{ px: 2, py: 2 }}
+        >
+          Пятница, 23 июня 2022
+        </Typography>
+        <Stack
+          spacing={2}
+          direction="row"
+          divider={<Divider orientation="vertical" flexItem />}
+          sx={{
+            py: 2,
+            px: 2,
+          }}
+          justifyContent="center"
+        >
+          <WeatherDay icon={<CloudIcon />} temp="19" day="ПТ" />
+          <WeatherDay
+            icon={<ThunderstormIcon />}
+            temp="17"
+            day="СБ"
+            color="orange"
+          />
+          <WeatherDay icon={<WbSunnyIcon />} temp="24" day="ВС" />
+        </Stack>
+        <Link href="#" sx={{ px: 2 }} textAlign="center" display="block">
+          Подробный прогноз
+        </Link>
+        <Alert severity="warning" sx={{ mt: 1 }}>
+          Рекомендуется провести чистку систем перед осадками
+        </Alert>
+      </Popover>
+      {Store.IsDeveloper() && (
+        <>
+          <IconButton sx={{ color: "white" }} onClick={handleClickDev}>
+            <SettingsIcon />
+          </IconButton>
+          <Popover
+            id="dev-popover"
+            open={Boolean(anchorElDev)}
+            anchorEl={anchorElDev}
+            onClose={handleCloseDev}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "center",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            PaperProps={{
+              sx: {
+                p: 1,
+              },
+            }}
+          >
+            <Typography component="p" variant="h6">
+              Ливневка:
+            </Typography>
+            <Stack direction="row">
+              <Button onClick={() => SetEmbedStatus(1, "0")}>В порядке</Button>
+              <Button onClick={() => SetEmbedStatus(1, "2")} color="warning">
+                Сильный поток
+              </Button>
+              <Button onClick={() => SetEmbedStatus(1, "1")} color="error">
+                Требуется очистка
+              </Button>
+            </Stack>
+            <Typography component="p" variant="h6">
+              Бак:
+            </Typography>
+            <Stack direction="row">
+              <Button onClick={() => SetEmbedStatus(10, "0")}>В порядке</Button>
+              <Button onClick={() => SetEmbedStatus(10, "1")} color="warning">
+                Забит наполовину
+              </Button>
+              <Button onClick={() => SetEmbedStatus(10, "2")} color="error">
+                Забит полностью
+              </Button>
+            </Stack>
+          </Popover>
+        </>
+      )}
+    </Stack>
   );
 };
 

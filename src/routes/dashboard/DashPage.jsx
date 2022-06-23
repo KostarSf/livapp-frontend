@@ -4,11 +4,14 @@ import {
   AccordionSummary,
   Box,
   Button,
+  ButtonGroup,
   Container,
   Paper,
   Stack,
   Tab,
   Tabs,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
   Zoom,
 } from "@mui/material";
@@ -16,7 +19,9 @@ import * as React from "react";
 import Header from "../../components/header/Header";
 import { Store } from "../../storage/Store";
 import MapImage from "../../images/map.png";
+import MapRouteImage from "../../images/map_route.png";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import RouteIcon from "@mui/icons-material/Route";
 import { grey } from "@mui/material/colors";
 import moment from "moment";
 import "moment/locale/ru";
@@ -25,6 +30,22 @@ moment.locale("ru");
 
 const DashPage = () => {
   const [systemType, setSystemType] = React.useState("drain");
+  const [embeds, setEmbeds] = React.useState([]);
+
+  const fetchEmbeds = () => {
+    fetch(
+      "https://emapi.kostarsf.space/api/embeded/system?limit=100&api_key=fab7b608"
+    )
+      .then((r) => r.json())
+      .then((r) => {
+        setEmbeds(r.systems);
+      });
+  };
+
+  React.useEffect(() => {
+    fetchEmbeds();
+    setInterval(fetchEmbeds, 4000);
+  }, []);
 
   return (
     <Box
@@ -36,7 +57,7 @@ const DashPage = () => {
         flexDirection: "column",
       }}
     >
-      <Header systems={getFakeSystems()} />
+      <Header systems={embeds} />
 
       <Container
         maxWidth="xl"
@@ -56,7 +77,7 @@ const DashPage = () => {
             flexGrow: 1,
           }}
         >
-          <Map systems={getFakeSystems()} />
+          <Map systems={embeds} />
           <Box>
             <Box marginBottom={2}>
               <Stack spacing={2} direction="row" justifyContent="center">
@@ -76,7 +97,7 @@ const DashPage = () => {
                 </Button>
               </Stack>
             </Box>
-            <SystemsList systemType={systemType} />
+            <SystemsList type={systemType} embeds={embeds} />
           </Box>
         </Stack>
       </Container>
@@ -85,7 +106,9 @@ const DashPage = () => {
 };
 
 function SystemsList(props) {
-  let systems = getFakeSystems(props.systemType);
+  let systems = props.embeds
+    .filter((sys) => sys.type === props.type)
+    .sort((a, b) => a.id - b.id);
 
   let list = systems.map((s) => {
     let statColor = "success.light";
@@ -93,6 +116,12 @@ function SystemsList(props) {
     let priorText = "Обычный";
     let priorColor = grey[900];
     let online = s.online;
+
+    if (!s.status) {
+      s.status = {
+        value: "0",
+      };
+    }
 
     if (s.priority === "1") {
       priorText = "Повышенный";
@@ -158,6 +187,13 @@ function SystemsList(props) {
         <AccordionDetails
           sx={{ paddingLeft: { xs: 2, sm: 6 }, position: "relative" }}
         >
+          <Typography
+            color={grey[900]}
+            sx={{ display: Store.IsDeveloper() ? "block" : "none" }}
+          >
+            {"Идентификатор: "}
+            {s.id}
+          </Typography>
           <Typography color={grey[500]}>
             {"Статус: "}
             <Box component="span" sx={{ color: statColor, fontWeight: 500 }}>
@@ -188,10 +224,23 @@ function SystemsList(props) {
 }
 
 function Map(props) {
-  let systems = props.systems.filter((sys) => sys.coords !== undefined);
+  const [filter, setFilter] = React.useState("all");
+  const [showRoute, setRoute] = React.useState(false);
+
+  let systems = props.systems.filter((sys) => sys.coords);
+
+  if (filter !== "all") {
+    systems = systems.filter((sys) => sys.type === filter);
+  }
 
   const MapDot = (props) => {
-    const sys = props.system;
+    let sys = props.system;
+
+    if (!sys.status) {
+      sys.status = {
+        value: "-1",
+      };
+    }
 
     let x = sys.coords.split(" ")[0];
     let y = sys.coords.split(" ")[1];
@@ -292,7 +341,7 @@ function Map(props) {
           width="1323px"
           height="909px"
           sx={{
-            background: `url(${MapImage})`,
+            background: `url(${showRoute ? MapRouteImage : MapImage})`,
             position: "relative",
           }}
         >
@@ -300,6 +349,72 @@ function Map(props) {
             <MapDot system={sys} key={sys.id} />
           ))}
         </Box>
+      </Box>
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          overflow: "auto",
+          pointerEvents: "none",
+        }}
+      >
+        <Stack
+          direction="row"
+          sx={{ m: 1, pointerEvents: "all" }}
+          alignItems="center"
+        >
+          <Box component={Paper}>
+            <Button
+              sx={{ px: { xs: 0, sm: 2 } }}
+              onClick={() => {
+                setRoute((s) => !s);
+                setFilter("all");
+              }}
+              variant={showRoute ? "contained" : "text"}
+            >
+              <RouteIcon />
+              <Typography
+                sx={{
+                  ml: 1,
+                  display: { xs: "none", sm: "inline-block" },
+                }}
+              >
+                Маршрут очистки
+              </Typography>
+            </Button>
+          </Box>
+          <Box flexGrow={1} />
+          <Box
+            component={Paper}
+            sx={{
+              mr: 2,
+            }}
+          >
+            <ToggleButtonGroup
+              color="primary"
+              value={filter}
+              exclusive
+              onChange={(e, v) => {
+                setFilter(v);
+                setRoute(false);
+              }}
+              size="small"
+            >
+              <ToggleButton value="all">Все</ToggleButton>
+              <ToggleButton value="drain">Ливневки</ToggleButton>
+              <ToggleButton value="trash">Баки</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+        </Stack>
+        <Stack
+          direction="row"
+          sx={{ mx: 1, display: showRoute ? "flex" : "none" }}
+        >
+          <Box component={Paper} sx={{ px: 1 }}>
+            <Typography>5 точек, 12км</Typography>
+            <Typography>Время: 30мин</Typography>
+          </Box>
+        </Stack>
       </Box>
     </Box>
   );
@@ -310,7 +425,7 @@ const getDisplayTime = (time) => {
   return time ? localtime.fromNow() : "Никогда";
 };
 
-function getFakeSystems(systemType = null) {
+function getFakeSystemsA(systemType = null) {
   const systems = [
     {
       id: 1,
