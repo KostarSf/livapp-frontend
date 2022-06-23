@@ -20,6 +20,7 @@ import WaterIcon from "@mui/icons-material/Water";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloudIcon from "@mui/icons-material/Cloud";
 import {
+  Alert,
   Badge,
   Divider,
   Link,
@@ -132,16 +133,18 @@ const Header = (props) => {
             ))}
           </List>
         </Popover>
-        <Button
-          onClick={handleClickWeather}
-          variant="text"
-          startIcon={<CloudIcon />}
-          sx={{
-            color: "white",
-          }}
-        >
-          24°
-        </Button>
+        <Badge badgeContent="1" color="warning" variant="dot">
+          <Button
+            onClick={handleClickWeather}
+            variant="text"
+            startIcon={<CloudIcon />}
+            sx={{
+              color: "white",
+            }}
+          >
+            24°
+          </Button>
+        </Badge>
         <Popover
           id="weather-popover"
           open={Boolean(anchorElWeather)}
@@ -155,60 +158,68 @@ const Header = (props) => {
             vertical: "top",
             horizontal: "center",
           }}
+          PaperProps={{
+            sx: {
+              maxWidth: { xs: "auto", sm: "350px" },
+            },
+          }}
         >
+          <Typography
+            variant="h6"
+            component="p"
+            color={grey[700]}
+            fontWeight={300}
+            textAlign="center"
+            sx={{ px: 2, py: 2 }}
+          >
+            Пятница, 23 июня 2022
+          </Typography>
           <Stack
             spacing={2}
             direction="row"
             divider={<Divider orientation="vertical" flexItem />}
             sx={{
-              py: 1,
+              py: 2,
               px: 2,
             }}
+            justifyContent="center"
           >
             <WeatherDay icon={<CloudIcon />} temp="19" day="ПТ" />
             <WeatherDay icon={<CloudIcon />} temp="18" day="СБ" />
             <WeatherDay icon={<WbSunnyIcon />} temp="24" day="ВС" />
           </Stack>
-          <Link href="#" sx={{ px: 2 }}>
+          <Link href="#" sx={{ px: 2 }} textAlign="center" display="block">
             Подробный прогноз
           </Link>
+          <Alert severity="warning" sx={{ mt: 1 }}>
+            Рекомендуется провести чистку систем перед осадками
+          </Alert>
         </Popover>
-        <DevLabel />
       </Stack>
     );
   };
 
   return (
     <>
-      <AppBar position="fixed">
+      <AppBar>
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <Box
-              component="img"
-              src={VegaLogoWhite}
-              sx={{ height: 30, mr: 2, display: { xs: "none", md: "block" } }}
-            />
-
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+            <Box sx={{ flexGrow: 1, display: { xs: "flex" } }}>
               <Box
                 component="img"
                 src={VegaLogoWhite}
                 sx={{
                   height: 30,
-                  display: { xs: "block", md: "none" },
+                  display: { xs: "block" },
                 }}
               />
             </Box>
             <Box
               sx={{
-                display: { xs: "flex", md: "none" },
+                display: { xs: "flex" },
                 flexGrow: 1,
               }}
             >
-              <MenuButtons />
-            </Box>
-
-            <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               <MenuButtons />
             </Box>
 
@@ -271,18 +282,6 @@ function ExitBtn() {
     >
       Выход
     </Button>
-  );
-}
-
-function DevLabel() {
-  if (Store.IsDeveloper() === false) {
-    return <></>;
-  }
-
-  return (
-    <Typography variant="button" marginY="auto" marginLeft={2}>
-      Режим Разработчика
-    </Typography>
   );
 }
 

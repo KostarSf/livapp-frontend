@@ -10,6 +10,7 @@ import {
   Tab,
   Tabs,
   Typography,
+  Zoom,
 } from "@mui/material";
 import * as React from "react";
 import Header from "../../components/header/Header";
@@ -40,17 +41,22 @@ const DashPage = () => {
       <Container
         maxWidth="xl"
         sx={{
-          flexGrow: 1,
           py: 2,
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Stack
           direction={{ xs: "column", md: "row" }}
           spacing={2}
           height="100%"
+          width="100%"
+          sx={{
+            flexGrow: 1,
+          }}
         >
-          <Map />
-
+          <Map systems={getFakeSystems()} />
           <Box>
             <Box marginBottom={2}>
               <Stack spacing={2} direction="row" justifyContent="center">
@@ -149,7 +155,9 @@ function SystemsList(props) {
             </Typography>
           </Stack>
         </AccordionSummary>
-        <AccordionDetails sx={{ paddingLeft: { xs: 2, sm: 6 } }}>
+        <AccordionDetails
+          sx={{ paddingLeft: { xs: 2, sm: 6 }, position: "relative" }}
+        >
           <Typography color={grey[500]}>
             {"Статус: "}
             <Box component="span" sx={{ color: statColor, fontWeight: 500 }}>
@@ -179,28 +187,55 @@ function SystemsList(props) {
   return <Box>{list}</Box>;
 }
 
-function Map() {
-  return (
-    <Box>
+function Map(props) {
+  let systems = props.systems.filter((sys) => sys.coords !== undefined);
+
+  const MapDot = (props) => {
+    let x = props.coords.split(" ")[0];
+    let y = props.coords.split(" ")[1];
+
+    return (
       <Box
-        flexGrow={1}
-        component={Paper}
         sx={{
-          position: "sticky",
-          height: { xs: "50vh", md: "85vh" },
+          width: "15px",
+          height: "15px",
+          bgcolor: "red",
+          position: "absolute",
+          top: y + "%",
+          left: x + "%",
+        }}
+      ></Box>
+    );
+  };
+
+  return (
+    <Box
+      component={Paper}
+      sx={{
+        width: "100%",
+        height: { xs: "50vh", md: "auto" },
+        position: "relative",
+      }}
+    >
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          overflow: "auto",
         }}
       >
         <Box
-          component="img"
-          src={MapImage}
-          alt=""
+          width="1323px"
+          height="909px"
           sx={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            filter: "saturate(0)",
+            background: `url(${MapImage})`,
+            position: "relative",
           }}
-        />
+        >
+          {systems.map((sys) => (
+            <MapDot coords={sys.coords} key={sys.id} />
+          ))}
+        </Box>
       </Box>
     </Box>
   );
@@ -221,6 +256,7 @@ function getFakeSystems(systemType = null) {
       priority: "1",
       address: "Анапское шоссе 11",
       description: "Находится на оживленном шоссе",
+      coords: "40 40",
       status: {
         id: 1,
         value: "0",
@@ -234,6 +270,7 @@ function getFakeSystems(systemType = null) {
       name: "Ливневка 2",
       priority: "0",
       address: "Анапское шоссе 24",
+      coords: "50 40",
       description: "Находится на оживленном шоссе",
       status: {
         id: 2,
@@ -248,6 +285,7 @@ function getFakeSystems(systemType = null) {
       name: "Ливневка 3",
       priority: "0",
       address: "ул. 2-я Лучезарная 13",
+      coords: "42 53",
       status: {
         id: 3,
         value: "2",
@@ -261,6 +299,7 @@ function getFakeSystems(systemType = null) {
       name: "Ливневка 4",
       priority: "0",
       address: "ул. Борисовская 3",
+      coords: "62 50",
       status: {
         id: 4,
         value: "0",
