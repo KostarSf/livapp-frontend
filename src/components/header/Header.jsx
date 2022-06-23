@@ -169,7 +169,9 @@ const Header = (props) => {
             <WeatherDay icon={<CloudIcon />} temp="18" day="СБ" />
             <WeatherDay icon={<WbSunnyIcon />} temp="24" day="ВС" />
           </Stack>
-          <Link href="#" sx={px: 2}>Подробный прогноз</Link>
+          <Link href="#" sx={{ px: 2 }}>
+            Подробный прогноз
+          </Link>
         </Popover>
         <DevLabel />
       </Stack>
