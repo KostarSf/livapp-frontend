@@ -19,6 +19,7 @@ import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import WaterIcon from "@mui/icons-material/Water";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloudIcon from "@mui/icons-material/Cloud";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
   Alert,
   Badge,
@@ -64,6 +65,15 @@ const Header = (props) => {
   const MenuButtons = () => {
     const [anchorElNotif, setAnchorElNotif] = React.useState(null);
     const [anchorElWeather, setAnchorElWeather] = React.useState(null);
+    const [anchorElDev, setAnchorElDev] = React.useState(null);
+
+    const handleClickDev = (event) => {
+      setAnchorElDev(event.currentTarget);
+    };
+
+    const handleCloseDev = () => {
+      setAnchorElDev(null);
+    };
 
     const handleClickNotif = (event) => {
       setAnchorElNotif(event.currentTarget);
@@ -195,6 +205,11 @@ const Header = (props) => {
             Рекомендуется провести чистку систем перед осадками
           </Alert>
         </Popover>
+        {Store.IsDeveloper() && (
+          <IconButton sx={{ color: "white" }} onClick={handleClickDev}>
+            <SettingsIcon />
+          </IconButton>
+        )}
       </Stack>
     );
   };

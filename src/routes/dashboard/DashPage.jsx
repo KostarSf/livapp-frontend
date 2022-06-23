@@ -191,20 +191,84 @@ function Map(props) {
   let systems = props.systems.filter((sys) => sys.coords !== undefined);
 
   const MapDot = (props) => {
-    let x = props.coords.split(" ")[0];
-    let y = props.coords.split(" ")[1];
+    const sys = props.system;
+
+    let x = sys.coords.split(" ")[0];
+    let y = sys.coords.split(" ")[1];
+
+    let bgcolor = "success.light";
+
+    if (sys.type === "drain") {
+      if (sys.status.value === "2") {
+        bgcolor = "warning.light";
+      }
+      if (sys.status.value === "1") {
+        bgcolor = "error.light";
+      }
+    }
+
+    if (sys.type === "trash") {
+      if (sys.status.value === "1") {
+        bgcolor = "warning.light";
+      }
+      if (sys.status.value === "2") {
+        bgcolor = "error.light";
+      }
+    }
+
+    let size = 30;
 
     return (
-      <Box
-        sx={{
-          width: "15px",
-          height: "15px",
-          bgcolor: "red",
-          position: "absolute",
-          top: y + "%",
-          left: x + "%",
-        }}
-      ></Box>
+      <>
+        <Box
+          sx={{
+            width: size + "px",
+            height: size + "px",
+            bgcolor: bgcolor,
+            position: "absolute",
+            borderRadius: "50%",
+            top: `calc(${y}% - ${size / 2}px)`,
+            left: `calc(${x}% - ${size / 2}px)`,
+            border: "6px solid white",
+            boxShadow: "0px 2px 4px 0px rgba(34, 60, 80, 0.4)",
+          }}
+        ></Box>
+        <Box
+          sx={{
+            display: sys.online ? "block" : "none",
+            position: "absolute",
+            top: `calc(${y}% - ${size / 2.5}px)`,
+            left: `calc(${x}% + ${size / 1.5}px)`,
+            bgcolor: "white",
+            px: 1,
+            borderRadius: 2,
+            py: 1,
+            boxShadow: "0px 2px 4px 0px rgba(34, 60, 80, 0.2)",
+          }}
+        >
+          <Typography
+            variant="button"
+            color={sys.online ? "primary" : grey[700]}
+            component="p"
+            sx={{
+              fontSize: 20,
+              lineHeight: 1,
+            }}
+          >
+            {sys.name}
+          </Typography>
+          <Typography
+            variant="body2"
+            color={grey[500]}
+            component="p"
+            sx={{
+              fontSize: 15,
+            }}
+          >
+            {sys.address}
+          </Typography>
+        </Box>
+      </>
     );
   };
 
@@ -233,7 +297,7 @@ function Map(props) {
           }}
         >
           {systems.map((sys) => (
-            <MapDot coords={sys.coords} key={sys.id} />
+            <MapDot system={sys} key={sys.id} />
           ))}
         </Box>
       </Box>
@@ -254,9 +318,9 @@ function getFakeSystems(systemType = null) {
       online: true,
       name: "Ливневка 1",
       priority: "1",
-      address: "Анапское шоссе 11",
-      description: "Находится на оживленном шоссе",
-      coords: "40 40",
+      address: "ул. Осоавиахима 21",
+      description: "Дорога на склоне",
+      coords: "38 40",
       status: {
         id: 1,
         value: "0",
@@ -266,11 +330,11 @@ function getFakeSystems(systemType = null) {
     {
       id: 2,
       type: "drain",
-      online: true,
+      online: false,
       name: "Ливневка 2",
       priority: "0",
       address: "Анапское шоссе 24",
-      coords: "50 40",
+      coords: "45 30",
       description: "Находится на оживленном шоссе",
       status: {
         id: 2,
@@ -281,7 +345,7 @@ function getFakeSystems(systemType = null) {
     {
       id: 3,
       type: "drain",
-      online: true,
+      online: false,
       name: "Ливневка 3",
       priority: "0",
       address: "ул. 2-я Лучезарная 13",
@@ -299,7 +363,7 @@ function getFakeSystems(systemType = null) {
       name: "Ливневка 4",
       priority: "0",
       address: "ул. Борисовская 3",
-      coords: "62 50",
+      coords: "57 60",
       status: {
         id: 4,
         value: "0",
@@ -378,6 +442,7 @@ function getFakeSystems(systemType = null) {
       name: "Бак 1",
       priority: "0",
       address: "Анапское шоссе 57",
+      coords: "32 18",
       description: "Во внутреннем дворе",
       status: {
         id: 1,
