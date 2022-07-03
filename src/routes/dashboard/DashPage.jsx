@@ -25,6 +25,7 @@ import RouteIcon from "@mui/icons-material/Route";
 import { grey } from "@mui/material/colors";
 import moment from "moment";
 import "moment/locale/ru";
+import EmbedItem from "../../components/embeditem/EmbedItem";
 
 moment.locale("ru");
 
@@ -110,117 +111,13 @@ function SystemsList(props) {
     .filter((sys) => sys.type === props.type)
     .sort((a, b) => a.id - b.id);
 
-  let list = systems.map((s) => {
-    let statColor = "success.light";
-    let statText = "В порядке";
-    let priorText = "Обычный";
-    let priorColor = grey[900];
-    let online = s.online;
-
-    if (!s.status) {
-      s.status = {
-        value: "0",
-      };
-    }
-
-    if (s.priority === "1") {
-      priorText = "Повышенный";
-      priorColor = "warning.main";
-    }
-
-    if (s.type === "drain") {
-      if (s.status.value === "2") {
-        statColor = "warning.light";
-        statText = "Сильный поток";
-      }
-      if (s.status.value === "1") {
-        statColor = "error.light";
-        statText = "Требуется очистка";
-      }
-    }
-
-    if (s.type === "trash") {
-      if (s.status.value === "1") {
-        statColor = "warning.light";
-        statText = "Заполнено наполовину";
-      }
-      if (s.status.value === "2") {
-        statColor = "error.light";
-        statText = "Заполнено полностью";
-      }
-    }
-
-    return (
-      <Accordion key={s.id}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Stack spacing={2} direction="row" alignItems="center">
-            <Box
-              component="span"
-              sx={{
-                bgcolor: online ? statColor : grey[300],
-                width: 15,
-                height: 15,
-                borderRadius: "50%",
-                border: "2px solid",
-                borderColor: statColor,
-              }}
-            />
-            <Typography
-              noWrap
-              display={{ xs: "none", sm: "flex" }}
-              width={{ xs: "0", sm: 110 }}
-              fontWeight={500}
-              color={online ? "black" : grey[500]}
-            >
-              {s.name}
-            </Typography>
-            <Typography
-              noWrap
-              width={{ xs: "auto", md: 200 }}
-              paddingRight={1}
-              color={grey[500]}
-            >
-              {s.address}
-            </Typography>
-          </Stack>
-        </AccordionSummary>
-        <AccordionDetails
-          sx={{ paddingLeft: { xs: 2, sm: 6 }, position: "relative" }}
-        >
-          <Typography
-            color={grey[900]}
-            sx={{ display: Store.IsDeveloper() ? "block" : "none" }}
-          >
-            {"Идентификатор: "}
-            {s.id}
-          </Typography>
-          <Typography color={grey[500]}>
-            {"Статус: "}
-            <Box component="span" sx={{ color: statColor, fontWeight: 500 }}>
-              {statText}
-            </Box>
-          </Typography>
-          <Typography color={grey[500]}>
-            {"Приоритет: "}
-            <Box component="span" sx={{ color: priorColor, fontWeight: 500 }}>
-              {priorText}
-            </Box>
-          </Typography>
-          <Typography color={grey[500]} sx={{ mt: 3 }}>
-            {"Обновлено: "}
-            <Box component="span" sx={{ color: grey[900], fontWeight: 500 }}>
-              {getDisplayTime(s.status.updatedAt)}
-            </Box>
-          </Typography>
-          <Typography color={grey[700]} fontWeight={500} sx={{ mt: 3 }}>
-            {s.description}
-          </Typography>
-        </AccordionDetails>
-      </Accordion>
-    );
-  });
-
-  return <Box>{list}</Box>;
+  return (
+    <Box>
+      {systems.map((s) => (
+        <EmbedItem system={s} />
+      ))}
+    </Box>
+  );
 }
 
 function Map(props) {
