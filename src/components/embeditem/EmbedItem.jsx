@@ -20,6 +20,8 @@ import { grey } from "@mui/material/colors";
 import { Store } from "../../storage/Store";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CircleIcon from "@mui/icons-material/Circle";
+import DiscFullIcon from "@mui/icons-material/DiscFull";
+import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
 
 import moment from "moment";
 import "moment/locale/ru";
@@ -49,7 +51,10 @@ const EmbedItem = (props) => {
     };
   }
 
-  let [statText, statColor] = getEmbedStatus(s.type, s.status.value);
+  let [statusText, hatchText, statusColor, hatchColor] = getEmbedStatus(
+    s.type,
+    s.status.value
+  );
   let [priorText, priorColor] = getEmbedPriority(s.priority);
   let online = s.online;
 
@@ -61,12 +66,12 @@ const EmbedItem = (props) => {
             <Box
               component="span"
               sx={{
-                bgcolor: online ? statColor : grey[300],
+                bgcolor: online ? statusColor : grey[300],
                 width: 15,
                 height: 15,
                 borderRadius: "50%",
                 border: "2px solid",
-                borderColor: statColor,
+                borderColor: statusColor,
               }}
             />
             <Typography
@@ -105,14 +110,23 @@ const EmbedItem = (props) => {
           >
             <Typography color={grey[500]}>
               {"Статус: "}
-              <Box component="span" sx={{ color: statColor, fontWeight: 500 }}>
-                {statText}
+              <Box
+                component="span"
+                sx={{ color: statusColor, fontWeight: 500 }}
+              >
+                {statusText}
               </Box>
             </Typography>
             <Button onClick={handleOpen} variant="outlined" size="small">
               История
             </Button>
           </Stack>
+          <Typography color={grey[500]}>
+            {"Люк: "}
+            <Box component="span" sx={{ color: hatchColor, fontWeight: 500 }}>
+              {hatchText}
+            </Box>
+          </Typography>
           <Typography color={grey[500]}>
             {"Приоритет: "}
             <Box component="span" sx={{ color: priorColor, fontWeight: 500 }}>
@@ -134,10 +148,23 @@ const EmbedItem = (props) => {
         <DialogTitle>История статусов</DialogTitle>
         <List>
           {statuses.map((st) => {
-            let [statusText, statusColor] = getEmbedStatus(s.type, st.value);
+            let [statusText, hatchText, statusColor, hatchColor] =
+              getEmbedStatus(s.type, st.value);
             let statusDate = getDisplayTime(st.updatedAt);
             return (
-              <ListItem disablePadding key={st.id}>
+              <ListItem
+                disablePadding
+                key={st.id}
+                secondaryAction={
+                  hatchText === "Закрыт" ? (
+                    <RadioButtonCheckedIcon sx={{ color: "green" }} />
+                  ) : hatchText === "Открыт" ? (
+                    <DiscFullIcon sx={{ color: "red" }} />
+                  ) : (
+                    <></>
+                  )
+                }
+              >
                 <ListItemButton>
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: grey[200], color: statusColor }}>
@@ -159,9 +186,25 @@ const EmbedItem = (props) => {
   );
 };
 
-const getEmbedStatus = (type, status) => {
-  let statColor = "success.light";
+const getEmbedStatus = (type, rawStatus) => {
   let statText = "В порядке";
+  let statColor = "success.light";
+  let hatchText = "Нет информации...";
+  let hatchColor = "gray.light";
+
+  let status = rawStatus;
+  if (rawStatus >= 10) {
+    status = Math.floor(rawStatus / 10) + "";
+    let hatchValue = rawStatus % 10 + "";
+    if (hatchValue === "1") {
+      hatchText = "Закрыт";
+      hatchColor = "success.light";
+    }
+    if (hatchValue === "0") {
+      hatchText = "Открыт";
+      hatchColor = "error.light";
+    }
+  }
 
   if (type === "drain") {
     if (status === "2") {
@@ -185,7 +228,7 @@ const getEmbedStatus = (type, status) => {
     }
   }
 
-  return [statText, statColor];
+  return [statText, hatchText, statColor, hatchColor];
 };
 
 const getEmbedPriority = (priority) => {
