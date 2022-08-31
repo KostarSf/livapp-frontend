@@ -192,10 +192,9 @@ const getEmbedStatus = (type, rawStatus) => {
   let hatchText = "Нет информации...";
   let hatchColor = "gray.light";
 
-  let status = rawStatus;
-  if (rawStatus >= 10) {
-    status = Math.floor(rawStatus / 10) + "";
-    let hatchValue = rawStatus % 10 + "";
+  let status = rawStatus.split(",")[0];
+  let hatchValue = rawStatus.split(",")[1];
+  if (hatchValue) {
     if (hatchValue === "1") {
       hatchText = "Закрыт";
       hatchColor = "success.light";
