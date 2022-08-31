@@ -37,6 +37,10 @@ import {
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
+import moment from "moment";
+import "moment/locale/ru";
+moment.locale("ru");
+
 const pages = ["Products", "Pricing", "Blog"];
 const settings = ["Profile", "Account", "Dashboard", "Logout"];
 
@@ -175,7 +179,7 @@ const MenuButtons = (props) => {
             {props.temp}°
           </Typography>
         </Box>
-        <Typography variant="body1">{props.day}</Typography>
+        <Typography variant="body1">{props.day.toUpperCase()}</Typography>
       </Box>
     );
   };
@@ -197,6 +201,9 @@ const MenuButtons = (props) => {
   const notifies = notifySystems.filter(
     (sys) => sys.status.value === (sys.type === "drain" ? "1" : "2")
   );
+
+  let display_todays = moment().format("dddd, DD MMMM YYYY");
+  display_todays = display_todays[0].toUpperCase() + display_todays.substring(1);
 
   return (
     <Stack spacing={2} direction="row" alignItems="center">
@@ -279,7 +286,8 @@ const MenuButtons = (props) => {
           textAlign="center"
           sx={{ px: 2, py: 2 }}
         >
-          Пятница, 23 июня 2022
+          {/* Пятница, 23 июня 2022 */}
+          {display_todays}
         </Typography>
         <Stack
           spacing={2}
@@ -291,14 +299,22 @@ const MenuButtons = (props) => {
           }}
           justifyContent="center"
         >
-          <WeatherDay icon={<CloudIcon />} temp="19" day="ПТ" />
+          <WeatherDay
+            icon={<CloudIcon />}
+            temp="19"
+            day={moment().format("dd")}
+          />
           <WeatherDay
             icon={<ThunderstormIcon />}
             temp="17"
-            day="СБ"
+            day={moment().add(1, "days").format("dd")}
             color="orange"
           />
-          <WeatherDay icon={<WbSunnyIcon />} temp="24" day="ВС" />
+          <WeatherDay
+            icon={<WbSunnyIcon />}
+            temp="24"
+            day={moment().add(2, "days").format("dd")}
+          />
         </Stack>
         <Link href="#" sx={{ px: 2 }} textAlign="center" display="block">
           Подробный прогноз
