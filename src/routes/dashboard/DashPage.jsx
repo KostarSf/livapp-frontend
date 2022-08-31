@@ -26,6 +26,7 @@ import { grey } from "@mui/material/colors";
 import moment from "moment";
 import "moment/locale/ru";
 import EmbedItem from "../../components/embeditem/EmbedItem";
+import Api from "../../utils/Api";
 
 moment.locale("ru");
 
@@ -34,13 +35,7 @@ const DashPage = () => {
   const [embeds, setEmbeds] = React.useState([]);
 
   const fetchEmbeds = () => {
-    fetch(
-      "https://emapi.kostarsf.space/api/embeded/system?limit=100&api_key=fab7b608"
-    )
-      .then((r) => r.json())
-      .then((r) => {
-        setEmbeds(r.systems);
-      });
+    Api.FetchSystems((r) => setEmbeds(r.systems));
   };
 
   React.useEffect(() => {

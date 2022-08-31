@@ -23,6 +23,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 
 import moment from "moment";
 import "moment/locale/ru";
+import Api from "../../utils/Api";
 
 moment.locale("ru");
 
@@ -39,13 +40,7 @@ const EmbedItem = (props) => {
   const [statuses, setStatuses] = React.useState([]);
 
   const fetchStatusHistory = () => {
-    fetch(
-      `https://emapi.kostarsf.space/api/embeded/system/${s.id}/statuses?api_key=fab7b608`
-    )
-      .then((r) => r.json())
-      .then((r) => {
-        setStatuses(r.statuses);
-      });
+    Api.FetchStatusHistory(s.id, (r) => setStatuses(r.statuses));
   };
 
   if (!s.status) {
