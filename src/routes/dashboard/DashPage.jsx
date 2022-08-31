@@ -35,7 +35,7 @@ const DashPage = () => {
   const [embeds, setEmbeds] = React.useState([]);
 
   const fetchEmbeds = () => {
-    Api.FetchSystems((r) => setEmbeds(r.systems));
+    Api.FetchSystems((r) => setEmbeds(r.systems.filter(system => system.type === "drain")));
   };
 
   React.useEffect(() => {
@@ -84,13 +84,13 @@ const DashPage = () => {
                 >
                   Ливневки
                 </Button>
-                <Button
+                {/* <Button
                   variant={systemType === "trash" ? "contained" : "text"}
                   fullWidth
                   onClick={() => setSystemType("trash")}
                 >
                   Баки
-                </Button>
+                </Button> */}
               </Stack>
             </Box>
             <SystemsList type={systemType} embeds={embeds} />
@@ -294,7 +294,7 @@ function Map(props) {
             >
               <ToggleButton value="all">Все</ToggleButton>
               <ToggleButton value="drain">Ливневки</ToggleButton>
-              <ToggleButton value="trash">Баки</ToggleButton>
+              {/* <ToggleButton value="trash">Баки</ToggleButton> */}
             </ToggleButtonGroup>
           </Box>
         </Stack>
@@ -303,7 +303,7 @@ function Map(props) {
           sx={{ mx: 1, display: showRoute ? "flex" : "none" }}
         >
           <Box component={Paper} sx={{ px: 1 }}>
-            <Typography>5 точек, 12км</Typography>
+            <Typography>4 точки, 12км</Typography>
             <Typography>Время: 30мин</Typography>
           </Box>
         </Stack>
