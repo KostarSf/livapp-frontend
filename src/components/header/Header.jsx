@@ -186,7 +186,7 @@ const MenuButtons = (props) => {
 
   const SetEmbedStatus = async (id, value) => {
     await fetch(
-      "https://emapi.kostarsf.space/api/embeded/status?api_key=fab7b608",
+      "/api/embeded/status?api_key=fab7b608",
       {
         method: "POST",
         headers: {
