@@ -109,7 +109,7 @@ function SystemsList(props) {
   return (
     <Box>
       {systems.map((s) => (
-        <EmbedItem system={s} />
+        <EmbedItem system={s} key={s.id}/>
       ))}
     </Box>
   );
@@ -140,10 +140,11 @@ function Map(props) {
     let bgcolor = "success.light";
 
     if (sys.type === "drain") {
-      if (sys.status.value === "2") {
+      let valuesArray = sys.status.value.split(',')
+      if (valuesArray[0] === "2") {
         bgcolor = "warning.light";
       }
-      if (sys.status.value === "1") {
+      if (valuesArray[0] === "1") {
         bgcolor = "error.light";
       }
     }
