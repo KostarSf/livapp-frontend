@@ -19,7 +19,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://emapi.kostarsf.space",
+  "proxy": "http://stormdrains.vega-project.ru",
   "eslintConfig": {
     "extends": [
       "react-app"
