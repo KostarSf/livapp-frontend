@@ -23,12 +23,10 @@ function Copyright(props) {
       align="center"
       {...props}
     >
-      {"Copyright © "}
-      <Link color="inherit" href="#">
-        VEGA
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
+      {`© ${new Date().getFullYear()} | ООО `}
+      <Link color="inherit" href="//vega-project.ru">
+        Проект Вега
+      </Link>
     </Typography>
   );
 }
@@ -38,8 +36,16 @@ const theme = createTheme();
 export default function LoginPage() {
   const handleSubmit = (event) => {
     event.preventDefault();
+
     const data = new FormData(event.currentTarget);
-    Store.Login(data.get("email") || "user@vega.ru");
+    const email = data.get("email");
+    const password = data.get("password");
+
+    if (!password || (email !== "user@vega.ru" && email !== "kostarsf@gmail.com")) return;
+
+    Store.Login(email);
+    Store.SetKey(password);
+
     window.location.reload();
   };
 
@@ -61,7 +67,7 @@ export default function LoginPage() {
             alt="Vega"
             sx={{
               mb: { xs: 2, sm: 4 },
-              height: { xs: "100px" },
+              height: { xs: "120px" },
             }}
           />
 
@@ -94,12 +100,11 @@ export default function LoginPage() {
               type="password"
               id="password"
               autoComplete="current-password"
-              defaultValue="qwerty123"
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Не выходить из системы"
-            />
+            {/*<FormControlLabel*/}
+            {/*  control={<Checkbox value="remember" color="primary" />}*/}
+            {/*  label="Не выходить из системы"*/}
+            {/*/>*/}
             <Button
               type="submit"
               fullWidth

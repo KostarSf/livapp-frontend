@@ -79,8 +79,8 @@ const Header = (props) => {
                 component="img"
                 src={VegaLogoWhite}
                 sx={{
-                  height: 30,
-                  display: { xs: "block" },
+                  height: 42,
+                  display: { xs: "block" }
                 }}
               />
             </Box>

@@ -128,6 +128,10 @@ function Map(props) {
   const MapDot = (props) => {
     let sys = props.system;
 
+    if (sys.coords.split(" ").length !== 2) {
+      return <></>
+    }
+
     if (!sys.status) {
       sys.status = {
         value: "-1",
@@ -231,8 +235,8 @@ function Map(props) {
         }}
       >
         <Box
-          width="1323px"
-          height="909px"
+          width="886px"
+          height="854px"
           sx={{
             background: `url(${showRoute ? MapRouteImage : MapImage})`,
             position: "relative",
@@ -243,72 +247,72 @@ function Map(props) {
           ))}
         </Box>
       </Box>
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          overflow: "auto",
-          pointerEvents: "none",
-        }}
-      >
-        <Stack
-          direction="row"
-          sx={{ m: 1, pointerEvents: "all" }}
-          alignItems="center"
-        >
-          <Box component={Paper}>
-            <Button
-              sx={{ px: { xs: 0, sm: 2 } }}
-              onClick={() => {
-                setRoute((s) => !s);
-                setFilter("all");
-              }}
-              variant={showRoute ? "contained" : "text"}
-            >
-              <RouteIcon />
-              <Typography
-                sx={{
-                  ml: 1,
-                  display: { xs: "none", sm: "inline-block" },
-                }}
-              >
-                Маршрут очистки
-              </Typography>
-            </Button>
-          </Box>
-          <Box flexGrow={1} />
-          <Box
-            component={Paper}
-            sx={{
-              mr: 2,
-            }}
-          >
-            <ToggleButtonGroup
-              color="primary"
-              value={filter}
-              exclusive
-              onChange={(e, v) => {
-                setFilter(v);
-                setRoute(false);
-              }}
-              size="small"
-            >
-              <ToggleButton value="all">Все</ToggleButton>
-              <ToggleButton value="drain">Ливневки</ToggleButton>
-              {/* <ToggleButton value="trash">Баки</ToggleButton> */}
-            </ToggleButtonGroup>
-          </Box>
-        </Stack>
-        <Stack
-          direction="row"
-          sx={{ mx: 1, display: showRoute ? "flex" : "none" }}
-        >
-          <Box component={Paper} sx={{ px: 1 }}>
-            <Typography>4 точки, 12км</Typography>
-            <Typography>Время: 30мин</Typography>
-          </Box>
-        </Stack>
-      </Box>
+      {/*<Box*/}
+      {/*  sx={{*/}
+      {/*    position: "absolute",*/}
+      {/*    inset: 0,*/}
+      {/*    overflow: "auto",*/}
+      {/*    pointerEvents: "none",*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  <Stack*/}
+      {/*    direction="row"*/}
+      {/*    sx={{ m: 1, pointerEvents: "all" }}*/}
+      {/*    alignItems="center"*/}
+      {/*  >*/}
+      {/*    <Box component={Paper}>*/}
+      {/*      <Button*/}
+      {/*        sx={{ px: { xs: 0, sm: 2 } }}*/}
+      {/*        onClick={() => {*/}
+      {/*          setRoute((s) => !s);*/}
+      {/*          setFilter("all");*/}
+      {/*        }}*/}
+      {/*        variant={showRoute ? "contained" : "text"}*/}
+      {/*      >*/}
+      {/*        <RouteIcon />*/}
+      {/*        <Typography*/}
+      {/*          sx={{*/}
+      {/*            ml: 1,*/}
+      {/*            display: { xs: "none", sm: "inline-block" },*/}
+      {/*          }}*/}
+      {/*        >*/}
+      {/*          Маршрут очистки*/}
+      {/*        </Typography>*/}
+      {/*      </Button>*/}
+      {/*    </Box>*/}
+      {/*    <Box flexGrow={1} />*/}
+      {/*    <Box*/}
+      {/*      component={Paper}*/}
+      {/*      sx={{*/}
+      {/*        mr: 2,*/}
+      {/*      }}*/}
+      {/*    >*/}
+      {/*      <ToggleButtonGroup*/}
+      {/*        color="primary"*/}
+      {/*        value={filter}*/}
+      {/*        exclusive*/}
+      {/*        onChange={(e, v) => {*/}
+      {/*          setFilter(v);*/}
+      {/*          setRoute(false);*/}
+      {/*        }}*/}
+      {/*        size="small"*/}
+      {/*      >*/}
+      {/*        <ToggleButton value="all">Все</ToggleButton>*/}
+      {/*        <ToggleButton value="drain">Ливневки</ToggleButton>*/}
+      {/*        /!* <ToggleButton value="trash">Баки</ToggleButton> *!/*/}
+      {/*      </ToggleButtonGroup>*/}
+      {/*    </Box>*/}
+      {/*  </Stack>*/}
+      {/*  <Stack*/}
+      {/*    direction="row"*/}
+      {/*    sx={{ mx: 1, display: showRoute ? "flex" : "none" }}*/}
+      {/*  >*/}
+      {/*    <Box component={Paper} sx={{ px: 1 }}>*/}
+      {/*      <Typography>4 точки, 12км</Typography>*/}
+      {/*      <Typography>Время: 30мин</Typography>*/}
+      {/*    </Box>*/}
+      {/*  </Stack>*/}
+      {/*</Box>*/}
     </Box>
   );
 }

@@ -24,4 +24,12 @@ export class Store {
   static GetEmail = () => {
     return localStorage.getItem("email");
   };
+
+  static SetKey = (key) => {
+    localStorage.setItem("key", key);
+  };
+
+  static GetKey = () => {
+    return localStorage.getItem("key");
+  };
 }
