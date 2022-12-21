@@ -71,12 +71,17 @@ function App() {
 
   return (
     <div className="App">
-      <div>
-        <input type="text" id="api_key_field" placeholder="API ключ" ref={apiKeyFieldRef}/>
-        <input type="button" value="Применить API ключ" id="api_key_apply_btn" onClick={useApiKeyHandle}/>
-        <span> {errorMessage}</span>
-      </div>
-      <div>
+      {errorMessage && (
+      <>
+        <form className='flex mb-3 bg-white shadow'>
+          <input className='flex-1 w-0 bg-white px-2' name='api_key' type="text" id="api_key_field" placeholder="API ключ" ref={apiKeyFieldRef}/>
+          <input className='font-medium bg-slate-300 px-3 py-1 cursor-pointer hover:bg-slate-700 hover:text-white' type="button" value="Применить ключ" id="api_key_apply_btn" onClick={useApiKeyHandle}/>
+        </form>
+        <div>
+          <p>{errorMessage}</p>
+        </div>
+      </>)}
+      <div className='flex flex-col gap-3'>
         {systems.map(system => {
           const updateDate = new Date(system.last_online)
 
@@ -85,22 +90,23 @@ function App() {
           const hoursPast = minutesPast / 60
           const daysPast = hoursPast / 24
 
-          const online = system.id === 4 ? secondsPast < 100 : secondsPast < 25
+          const online = system.id == 4 ? secondsPast < 90 : secondsPast < 25
 
           const timeText = secondsPast < 60 ? Math.ceil(secondsPast) + " секунд"
             : minutesPast < 120 ? Math.ceil(minutesPast) + " минут"
             : hoursPast < 24 ? Math.ceil(hoursPast) + " часов"
             : Math.ceil(daysPast) + " дней"
 
-          const onlineSpan = online ? <span style={{color: "#46b230"}}>ОНЛАЙН</span> 
-            : <span style={{color: "#acb0b3"}}>Был в сети {timeText} назад</span>
+          const onlineStatusSpan = online ? <span className='text-lime-500'>ОНЛАЙН</span>
+            : <span className='text-slate-300'>ОФФЛАЙН</span>
 
           return (
-            <div key={system.id}>
-              <p>{system.name} - {system.address} {onlineSpan}</p>
-              <p>Обновлено: {updateDate.toLocaleString()}</p>
-              <p>Показания: {system.status?.value || "отсутствуют"}</p>
-              <br />
+            <div key={system.id} className='drop-shadow bg-white p-2'>
+              <p className='font-bold'>{system.name} - {system.address} {onlineStatusSpan}</p>
+              <p className='text-slate-400 font-normal'>Обновлено {timeText} назад <br /> {updateDate.toLocaleString()}</p>
+              {system.status?.value && (
+                <p>Показания: {system.status?.value}</p>
+              )}
             </div>
           )
         })}
