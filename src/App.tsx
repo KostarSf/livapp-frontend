@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import CityMap from "./CityMap";
 import { drainStatus, DrainStatusType, mapLink } from "./utils/drainUtils";
 
 type StatusData = {
@@ -10,7 +11,7 @@ type StatusData = {
   updatedAt: string;
 };
 
-type SystemData = {
+export type SystemData = {
   id: number;
   last_online: string;
   name: string;
@@ -18,6 +19,9 @@ type SystemData = {
   description: string;
   status: StatusData;
   drain_depth: number;
+  drain_depth_2: number;
+  hidden: boolean;
+  coords: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -72,7 +76,9 @@ function App() {
         } else {
           setMessage("");
           const systems: SystemData[] = data.systems;
-          setSystems(systems.sort((a, b) => a.id - b.id));
+          setSystems(
+            systems.sort((a, b) => a.id - b.id).filter((s) => !s.hidden)
+          );
         }
       })
       .catch(setMessage);
@@ -80,6 +86,14 @@ function App() {
 
   return (
     <div className='App'>
+      <div
+        className='bg-slate-200 relative'
+        style={{
+          height: "60vh",
+        }}
+      >
+        <CityMap systems={systems} />
+      </div>
       <form className='flex mb-3 bg-white shadow' onSubmit={useApiKeyHandle}>
         <input
           className='flex-1 w-0 bg-white px-2'
@@ -108,7 +122,8 @@ function App() {
           const hoursPast = minutesPast / 60;
           const daysPast = hoursPast / 24;
 
-          const online = system.id == 4 ? secondsPast < 90 : secondsPast < 25;
+          // const online = system.id == 4 ? secondsPast < 90 : secondsPast < 25;
+          const online = true;
 
           const timeText =
             secondsPast < 60
@@ -120,7 +135,8 @@ function App() {
               : Math.ceil(daysPast) + " дней";
 
           const onlineStatusSpan = online ? (
-            <span className='text-lime-500'>ОНЛАЙН</span>
+            // <span className='text-lime-500'>ОНЛАЙН</span>
+            <></>
           ) : (
             <span className='text-slate-300'>ОФФЛАЙН</span>
           );
@@ -144,12 +160,35 @@ function App() {
               {status && online ? (
                 <>
                   <p className='text-slate-700'>
-                    Загруженность:{" "}
-                    <span className='font-medium'>{status.load}</span>
+                    Заполнение на участке 1:{" "}
+                    <span className='font-semibold'>
+                      {system.drain_depth -
+                        Number(system.status.value.split(" ")[0])}
+                      {"/"}
+                      {system.drain_depth}
+                      {" см "}
+                    </span>
                   </p>
                   <p className='text-slate-700'>
-                    Вероятность засора:{" "}
-                    <span className='font-medium'>{status.clog}</span>
+                    Заполнение на участке 2:{" "}
+                    <span className='font-semibold'>
+                      {system.drain_depth_2 -
+                        Number(system.status.value.split(" ")[1])}
+                      {"/"}
+                      {system.drain_depth_2}
+                      {" см "}
+                    </span>
+                  </p>
+                  <p className='text-slate-700'>
+                    Разница высот потоков:{" "}
+                    <span className='font-semibold'>
+                      {Math.round(
+                        (1 -
+                          Number(system.status.value.split(" ")[0]) /
+                            Number(system.status.value.split(" ")[1])) *
+                          100
+                      ) / 100}
+                    </span>
                   </p>
                 </>
               ) : null}
@@ -157,7 +196,8 @@ function App() {
               <details>
                 <summary>Детали</summary>
                 <p className='text-slate-400 font-normal'>
-                  Обновлено {timeText} назад ({updateDate.toLocaleString()})
+                  Обновлено {timeText} назад <br />
+                  {updateDate.toLocaleString()}
                 </p>
                 <p>
                   <a
@@ -172,10 +212,12 @@ function App() {
                   </a>
                 </p>
                 {system.status?.value && (
-                  <p>
-                    Последние показания: {system.status?.value} (
-                    {system.drain_depth})
-                  </p>
+                  <>
+                    <p>
+                      Последние показания: {system.status.value} (
+                      {system.drain_depth} {system.drain_depth_2})
+                    </p>
+                  </>
                 )}
               </details>
             </div>
