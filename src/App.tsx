@@ -182,12 +182,17 @@ function App() {
                   <p className='text-slate-700'>
                     Разница высот потоков:{" "}
                     <span className='font-semibold'>
-                      {Math.round(
-                        (1 -
-                          Number(system.status.value.split(" ")[0]) /
-                            Number(system.status.value.split(" ")[1])) *
-                          100
-                      ) / 100}
+                      {(() => {
+                        const val =
+                        Math.round(
+                          (1 -
+                            Number(system.status.value.split(" ")[0]) /
+                              Number(system.status.value.split(" ")[1])) *
+                            100
+                        ) / 100;
+                        if (val < 0.3) return <span className='text-green-700'>{val} (Очистка не требуется)</span>;
+                        return val;
+                      })()}
                     </span>
                   </p>
                 </>
